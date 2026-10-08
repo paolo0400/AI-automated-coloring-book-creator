@@ -352,3 +352,7 @@ Combine with `BOOKGEN_FAKE=1` to also skip Ollama (fake mode skips the image eng
 - KDP requires disclosing AI-generated images when you publish.
 - Use image models whose licenses allow commercial use.
 - KDP allows spine text only at 79+ pages; at 82 pages the spine is ~0.18 in, so it's left blank.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
