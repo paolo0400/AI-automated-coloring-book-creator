@@ -1,0 +1,83 @@
+# =====================================================================
+#  Coloring book pipeline settings
+#  Edit this file, not the Python code.
+# =====================================================================
+
+# ---- Who does what --------------------------------------------------
+# provider: "ollama" (free, local) or "gemini" (cheap, cloud)
+# Run `ollama list` to see the exact model names you have installed.
+roles:
+  theme:        { provider: ollama, model: "qwen3:14b" }   # step 1: title, characters, 40 scenes
+  vision_qa:    { provider: ollama, model: "gemma3:12b" }  # checks each coloring page
+  cover_judge:  { provider: ollama, model: "gemma3:12b" }  # step 3: judges the cover
+  # Smarter (still cheap) option for the cover judge:
+  # cover_judge: { provider: gemini, model: "gemini-flash-latest" }
+
+# ---- Image generation -----------------------------------------------
+# provider: "drawthings" = free, runs on this Mac (Draw Things app with API Server on)
+#           "gemini"     = paid Google cloud API (needs GEMINI_API_KEY in .env)
+images:
+  provider: drawthings
+  # Gemini settings (only used when provider is gemini).
+  # Run `python -m bookgen models` to see the exact image model names on your key.
+  page_model:  "gemini-3.1-flash-image"   # coloring pages, title border, character sheet
+  cover_model: "gemini-3.1-flash-image"   # or "gemini-3-pro-image" for a nicer cover
+  page_size:   "1K"                       # 1K is fine for line art (cleanup upscales it)
+  cover_size:  "2K"                       # cover is where resolution shows
+
+# Draw Things settings (only used when provider is drawthings).
+# Anything left blank uses whatever is currently selected in the Draw Things app,
+# so the easiest way to tune model/steps/sampler is right in the app.
+drawthings:
+  url: "http://127.0.0.1:7860"
+  model: ""                 # blank = the model loaded in the app (FLUX.1 schnell or SDXL recommended)
+  steps: ""                 # blank = app setting (FLUX schnell: ~4, SDXL: ~25-30)
+  guidance_scale: ""        # blank = app setting
+  page_size:  [768, 1024]   # width, height in pixels (multiples of 64)
+  cover_size: [960, 1280]   # bigger = sharper cover but slower
+  max_attempts: 5           # retries are free locally, so allow more
+  timeout_seconds: 900      # give up on one image after this long
+
+# Estimated USD per Gemini image, used for the budget guard.
+# Check https://ai.google.dev/gemini-api/docs/pricing and update if prices change.
+prices_usd_per_image:
+  gemini-3.1-flash-image: { "1K": 0.067, "2K": 0.101, "4K": 0.151 }
+  gemini-3-pro-image:     { "1K": 0.134, "2K": 0.134, "4K": 0.24 }
+  default: 0.15            # used for any model not listed above
+text_call_cost_usd: 0.002  # rough estimate per Gemini text call
+
+# ---- Money guards ---------------------------------------------------
+budget:
+  max_usd_per_book: 15.00     # the pipeline stops before going over this
+  max_usd_total:    50.00     # across every book in this folder
+  max_attempts_per_image: 3   # retries per page before flagging it for you (Gemini)
+
+# ---- Quality checks -------------------------------------------------
+qa:
+  vision_mode: strict        # strict = retry on failure, advisory = just note it, off = skip
+  min_cover_score: 6         # 1-10, from the cover judge
+  max_gray_fraction: 0.12    # more gray than this = shaded page, rejected
+  max_black_fraction: 0.35   # more ink than this = too dark for kids to color
+  min_black_fraction: 0.02   # less ink than this = nearly empty page
+  max_solid_fill_fraction: 0.30  # share of ink that is big solid blobs
+  max_color_fraction: 0.03   # colored pixels allowed on a "black and white" page
+  thin_line_fraction: 0.50   # above this, cleanup thickens lines (KDP minimum is 0.75 pt)
+
+# ---- Workflow -------------------------------------------------------
+pause_for_review: true       # `all` stops after the theme and after the cover so you can look
+
+# ---- Book / KDP print settings --------------------------------------
+book:
+  author_name: "Your Name"   # printed on the cover
+  default_num_pages: 40
+  age_range: "4-8"
+  trim_width_in: 8.5
+  trim_height_in: 11
+  dpi: 300
+  paper: white               # white or cream (black-and-white interior)
+  blank_backs: true          # blank page behind every coloring page
+  safe_margin_in: 0.5        # art stays this far from every trimmed edge
+  cover_text_margin_in: 0.5  # cover text stays this far inside the trim
+
+fonts:
+  title: ""                  # optional full path to a .ttf; otherwise see fonts/README.txt
