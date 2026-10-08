@@ -61,8 +61,8 @@ On a 16 GB Mac, `qwen3:8b` and `gemma3:4b` are lighter alternatives.
 ### 1. Get the code
 
 ```bash
-git clone https://github.com/<your-username>/coloring-book-pipeline.git
-cd coloring-book-pipeline
+git clone https://github.com/paolo0400/AI-automated-coloring-book-creator.git
+cd AI-automated-coloring-book-creator
 ```
 
 ### 2. Create the Python environment
@@ -246,7 +246,7 @@ that keep failing, and redoes them, following the rules in `CLAUDE.md`.
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash      # install Claude Code
 launchctl setenv OLLAMA_CONTEXT_LENGTH 64000         # local models need ~64k context; restart Ollama
-cd coloring-book-pipeline
+cd AI-automated-coloring-book-creator
 ollama launch claude                                 # pick a strong tool-calling model
 ```
 
